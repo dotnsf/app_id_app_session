@@ -11,13 +11,13 @@ This application is based on [this](https://github.com/dotnsf/app_id_app).
 
 - Set redis server and port in settings.js:
 
-  - `exports.redis_server = 'redis_server';`
+  - `exports.redis_server = 'redisserver';`
 
   - `exports.redis_port = 6379;`
 
 - Create docker image:
 
-  - `$ docker build -t app_id_app_session .`
+  - `$ docker build -t yourname/app-id-app-session .`
 
 - Create docker network:
 
@@ -25,15 +25,44 @@ This application is based on [this](https://github.com/dotnsf/app_id_app).
 
 - Run Redis image as container:
 
-  - `$ docker run -d --net mynetwork --name redis_server redis`
+  - `$ docker run -d --net mynetwork --name redisserver redis`
 
 - Run my image as container:
 
-  - `$ docker run -d -p 8080:8080 --net mynetwork --name app_id_app_session app_id_app_session`
+  - `$ docker run -d -p 8080:8080 --net mynetwork --name app-id-app-session yourname/app-id-app-session`
 
 - Access to application:
 
   - http://localhost:8080/
+
+
+## How to run on k8s
+
+- Set redis server and port in settings.js:
+
+  - `exports.redis_server = 'redisserver';`
+
+  - `exports.redis_port = 6379;`
+
+- Create docker image:
+
+  - `$ docker build -t yourname/app-id-app-session .`
+
+- Push your docker image:
+
+  - `$ docker login`
+
+  - `$ docker push yourname/app-id-app-session`
+
+- Edit yaml/app_deployment.yaml with your image name
+
+- Run redis as pod:
+
+  - `$ kubectl apply -f yaml/redis_deployment.yaml`
+
+- Run application as pod:
+
+  - `$ kubectl apply -f yaml/app_deployment.yaml`
 
 
 ## Reference
@@ -41,6 +70,8 @@ This application is based on [this](https://github.com/dotnsf/app_id_app).
 https://s8a.jp/node-js-express-redis
 
 https://stackoverflow.com/questions/41427756/error-redis-connection-to-127-0-0-16379-failed-connect-econnrefused-127-0-0
+
+https://qiita.com/cyberblack28/items/0d7abff8efb33ecc1ca2
 
 
 ## Copyright

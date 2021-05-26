@@ -44,6 +44,15 @@ This application is based on [this](https://github.com/dotnsf/app_id_app).
 
   - `exports.redis_port = 6379;`
 
+- Set App ID info in yaml/app_deployment.yaml:
+
+  - `REGION`
+  - `TENANT_ID`
+  - `APIKEY`
+  - `SECRET`
+  - `CLIENT_ID`
+  - `REDIRECT_URI`
+
 - Create docker image:
 
   - `$ docker build -t yourname/app-id-app-session .`

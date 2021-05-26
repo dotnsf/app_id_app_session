@@ -9,14 +9,14 @@ spec:
   - port: 8080
     protocol: TCP
     targetPort: 8080
-  type: NodePort
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: app-id-app-session
 spec:
-  replicas: 1
+  replicas: 5
   selector:
     matchLabels:
       app: app-id-app-session
@@ -27,6 +27,37 @@ spec:
     spec:
       containers:
       - name: app-id-app-session
-        image: yourname/app-id-app-session
+        image: dotnsf/app-id-app-session
+        env:
+        - name: REGION
+          value: "us-south"
+        - name: TENANT_ID
+          value: ""
+        - name: APIKEY
+          value: ""
+        - name: SECRET
+          value: ""
+        - name: CLIENT_ID
+          value: ""
+        - name: REDIRECT_URI
+          value: ""
         ports:
         - containerPort: 8080
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: app.dotnsf-mycluster-tok04-6fe57c7eaf38abe6232341d97eae54c0-0000.jp-tok.containers.appdomain.cloud
+spec:
+  tls:
+  - hosts:
+    - app.dotnsf-mycluster-tok04-6fe57c7eaf38abe6232341d97eae54c0-0000.jp-tok.containers.appdomain.cloud
+    secretName: dotnsf-mycluster-tok04-6fe57c7eaf38abe6232341d97eae54c0-0000
+  rules:
+  - host: app.dotnsf-mycluster-tok04-6fe57c7eaf38abe6232341d97eae54c0-0000.jp-tok.containers.appdomain.cloud
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: app-id-app-session
+          servicePort: 8080

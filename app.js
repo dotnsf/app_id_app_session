@@ -15,12 +15,23 @@ var express = require( 'express' ),
 
 var settings = require( './settings' );
 
+//. env values
+var settings_redis_server = 'REDIS_SERVER' in process.env ? process.env.REDIS_SERVER : settings.redis_server;
+var settings_redis_port = 'REDIS_PORT' in process.env ? process.env.REDIS_PORT : settings.redis_port;
+var settings_region = 'REGION' in process.env ? process.env.REGION : settings.region;
+var settings_tenantId = 'TENANT_ID' in process.env ? process.env.TENANT_ID : settings.tenantId;
+var settings_apiKey = 'APIKEY' in process.env ? process.env.APIKEY : settings.apiKey;
+var settings_secret = 'SECRET' in process.env ? process.env.SECRET : settings.secret;
+var settings_clientId = 'CLIENT_ID' in process.env ? process.env.CLIENT_ID : settings.clientId;
+var settings_redirectUri = 'REDIRECT_URI' in process.env ? process.env.REDIRECT_URI : settings.redirectUri;
+var settings_oauthServerUrl = 'https://' + settings_region + '.appid.cloud.ibm.com/oauth/v4/' + settings_tenantId;
+
+
 var RedisStore = require( 'connect-redis' )( session );
 var redisClient = redis.createClient({
-  host: settings.redis_server,
-  port: settings.redis_port
+  host: settings_redis_server,
+  port: settings_redis_port
 });
-//var redisClient = redis.createClient( settings.redis_port, "redis_server" );
 
 //. setup session
 app.use( session({
@@ -41,16 +52,16 @@ app.use( passport.session() );
 passport.serializeUser( ( user, cb ) => cb( null, user ) );
 passport.deserializeUser( ( user, cb ) => cb( null, user ) );
 passport.use( new WebAppStrategy({
-  tenantId: settings.tenantId,
-  clientId: settings.clientId,
-  secret: settings.secret,
-  oauthServerUrl: settings.oauthServerUrl,
-  redirectUri: settings.redirectUri
+  tenantId: settings_tenantId,
+  clientId: settings_clientId,
+  secret: settings_secret,
+  oauthServerUrl: settings_oauthServerUrl,
+  redirectUri: settings_redirectUri
 }));
 
 //. #35
 var access_token = null;
-settings.getAccessToken().then( function( token ){
+getAccessToken().then( function( token ){
   if( token ){
     access_token = token;
   }
@@ -151,7 +162,7 @@ async function getProfile( userId ){
         authorization: 'Bearer ' + access_token
       };
       var option1 = {
-        url: 'https://' + settings.region + '.appid.cloud.ibm.com/management/v4/' + settings.tenantId + '/users/' + userId + '/profile',
+        url: 'https://' + settings_region + '.appid.cloud.ibm.com/management/v4/' + settings_tenantId + '/users/' + userId + '/profile',
         method: 'GET',
         headers: headers1
       };
@@ -168,6 +179,33 @@ async function getProfile( userId ){
     }else{
       resolve( null );
     }
+  });
+}
+
+async function getAccessToken(){
+  return new Promise( async ( resolve, reject ) => {
+    //. GET an IAM token
+    //. https://cloud.ibm.com/docs/appid?topic=appid-manging-api&locale=ja
+    var headers = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Accept': 'application/json'
+    };
+    var option = {
+      url: 'https://iam.cloud.ibm.com/oidc/token',
+      method: 'POST',
+      body: 'grant_type=urn:ibm:params:oauth:grant-type:apikey&apikey=' + settings_apiKey,
+      headers: headers
+    };
+    request( option, ( err, res, body ) => {
+      if( err ){
+        console.log( err );
+        resolve( null );
+      }else{
+        body = JSON.parse( body );
+        var access_token = body.access_token;
+        resolve( access_token );
+      }
+    });
   });
 }
 

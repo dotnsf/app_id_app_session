@@ -1,6 +1,37 @@
 apiVersion: v1
 kind: Service
 metadata:
+  name: redisserver
+spec:
+  selector:
+    app: redis
+  ports:
+  - port: 6379
+    targetPort: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis
+        ports:
+        - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: app-id-app-session
 spec:
   selector:
@@ -27,10 +58,10 @@ spec:
     spec:
       containers:
       - name: app-id-app-session
-        image: dotnsf/app-id-app-session
+        image: yourname/app-id-app-session
         env:
         - name: REGION
-          value: "us-south"
+          value: ""
         - name: TENANT_ID
           value: ""
         - name: APIKEY
@@ -40,21 +71,21 @@ spec:
         - name: CLIENT_ID
           value: ""
         - name: REDIRECT_URI
-          value: ""
+          value: "http://localhost:8080/appid/callback"
         ports:
         - containerPort: 8080
 ---
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: app.dotnsf-mycluster-tok04-6fe57c7eaf38abe6232341d97eae54c0-0000.jp-tok.containers.appdomain.cloud
+  name: hostname
 spec:
   tls:
   - hosts:
-    - app.dotnsf-mycluster-tok04-6fe57c7eaf38abe6232341d97eae54c0-0000.jp-tok.containers.appdomain.cloud
-    secretName: dotnsf-mycluster-tok04-6fe57c7eaf38abe6232341d97eae54c0-0000
+    - hostname
+    secretName: hostname
   rules:
-  - host: app.dotnsf-mycluster-tok04-6fe57c7eaf38abe6232341d97eae54c0-0000.jp-tok.containers.appdomain.cloud
+  - host: hostname
     http:
       paths:
       - path: /

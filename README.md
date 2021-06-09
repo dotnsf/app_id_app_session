@@ -44,15 +44,6 @@ This application is based on [this](https://github.com/dotnsf/app_id_app).
 
   - `exports.redis_port = 6379;`
 
-- Set App ID info in yaml/app_deployment.yaml:
-
-  - `REGION`
-  - `TENANT_ID`
-  - `APIKEY`
-  - `SECRET`
-  - `CLIENT_ID`
-  - `REDIRECT_URI`
-
 - Create docker image:
 
   - `$ docker build -t yourname/app-id-app-session .`
@@ -65,9 +56,24 @@ This application is based on [this](https://github.com/dotnsf/app_id_app).
 
 - Edit yaml/app_deployment.yaml with your image name
 
-- Run redis as pod:
+- Set App ID info in yaml/app_deployment.yaml:
 
-  - `$ kubectl apply -f yaml/redis_deployment.yaml`
+  - `REGION`
+  - `TENANT_ID`
+  - `APIKEY`
+  - `SECRET`
+  - `CLIENT_ID`
+  - `REDIRECT_URI`
+
+- Set Ingress info in yaml/app_deployment.yaml:
+
+  - `metadata.name` : FQDN hostname
+
+  - `spec.tls.hosts` : FQDN hostname
+
+  - `spec.tls.secretName` : servername
+
+  - `spec.rules.host` FQDN hostname
 
 - Run application as pod:
 
